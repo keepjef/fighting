@@ -45,8 +45,8 @@ while not exit:
         if keys[pygame.K_SPACE] and on_ground == True:
             jump_height_flag = True
             jump_height = batman.y - 100
-            velocity = 10
-            a = 50
+            velocity = 5
+            a = 25
             on_ground = False
 
     if on_ground == False and jump_height_flag == True:
