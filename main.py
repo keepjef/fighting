@@ -1,5 +1,6 @@
 import pygame
 from character import Character
+import math
 pygame.init()
 width = 1000
 height = 600
@@ -16,12 +17,12 @@ sprites = [
     pygame.image.load("assets/images/walking se0006.bmp"),
 ]
 sprite_scale = [pygame.transform.scale(image, (200,200)) for image in sprites]
-batman = Character("Batman", 100, 100, 100, image=image, strength=10, sprites=sprite_scale)
+batman = Character("Batman", 100, 100, 350, image=image, strength=10, sprites=sprite_scale)
 exit = False
 clock = pygame.time.Clock()
 count = 0
 on_ground = True
-
+jump_height_flag = False
 
 while not exit:
     clock.tick(30)
@@ -42,14 +43,24 @@ while not exit:
         if keys[pygame.K_DOWN]:
             batman.y = batman.y + 5
         if keys[pygame.K_SPACE] and on_ground == True:
-            batman.y = batman.y - 250
-            velocity = 0
-            a = 0.3
+            jump_height_flag = True
+            jump_height = batman.y - 100
+            velocity = 10
+            a = 50
             on_ground = False
-    if on_ground == False:
+
+    if on_ground == False and jump_height_flag == True:
+        velocity = velocity + math.sqrt(a)
+        batman.y = batman.y - velocity
+        if batman.y <= jump_height:
+            velocity = 0
+            a = 0.6
+            jump_height_flag = False
+
+    elif on_ground == False:
         batman.y = batman.y + velocity
         velocity = velocity + a**2
-        if batman.y >= height-200:
+        if batman.y >= height-250:
             on_ground = True
     display.blit(batman.sprites[count],(batman.x,batman.y))
     pygame.display.update()
