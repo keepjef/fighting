@@ -1,66 +1,90 @@
 import pygame
 from character import Character
-import math
+
 pygame.init()
 width = 1000
 height = 600
 display = pygame.display.set_mode((width, height))
-pygame.display.set_caption("Fight club")
+pygame.display.set_caption("Fight Club")
+
+# Загрузка изображений
 image = pygame.image.load("assets/images/img.png")
-sprites = [
-    pygame.image.load("assets/images/walking se0000.bmp"),
-    pygame.image.load("assets/images/walking se0001.bmp"),
-    pygame.image.load("assets/images/walking se0002.bmp"),
-    pygame.image.load("assets/images/walking se0003.bmp"),
-    pygame.image.load("assets/images/walking se0004.bmp"),
-    pygame.image.load("assets/images/walking se0005.bmp"),
-    pygame.image.load("assets/images/walking se0006.bmp"),
+run_sprites = [
+    pygame.image.load("assets/Fighter sprites/fighter_run_0018.png"),
+    pygame.image.load("assets/Fighter sprites/fighter_run_0019.png"),
+    pygame.image.load("assets/Fighter sprites/fighter_run_0020.png"),
+    pygame.image.load("assets/Fighter sprites/fighter_run_0021.png"),
+    pygame.image.load("assets/Fighter sprites/fighter_run_0022.png"),
+    pygame.image.load("assets/Fighter sprites/fighter_run_0023.png"),
+    pygame.image.load("assets/Fighter sprites/fighter_run_0024.png"),
 ]
-sprite_scale = [pygame.transform.scale(image, (200,200)) for image in sprites]
-batman = Character("Batman", 100, 100, 350, image=image, strength=10, sprites=sprite_scale)
+attack_sprites = [
+    pygame.image.load("assets/Sword sprites/sword_air_attack_0063.png"),
+    # Добавьте больше спрайтов атаки для анимации
+]
+jump_sprites = [
+    pygame.image.load("assets/Fighter sprites/fighter_jump_0043.png"),
+    pygame.image.load("assets/Fighter sprites/fighter_jump_0044.png"),
+    pygame.image.load("assets/Fighter sprites/fighter_jump_0045.png"),
+    pygame.image.load("assets/Fighter sprites/fighter_jump_0046.png"),
+    pygame.image.load("assets/Fighter sprites/fighter_jump_0047.png"),
+]
+
+# Создание персонажей
+batman = Character("Batman", 100, 20, 200, image, 10, run_sprites, attack_sprites, jump_sprites)
+spider_man = Character("Spider-Man", 100, 800, 200, image, 10, run_sprites, attack_sprites, jump_sprites)
+
 exit = False
 clock = pygame.time.Clock()
-count = 0
-on_ground = True
-jump_height_flag = False
 
 while not exit:
-    clock.tick(30)
+    clock.tick(40)
     display.fill('green')
-    count += 1
-    if count == len(batman.sprites):
-        count = 0
+    pygame.draw.rect(display, (255, 255, 255), pygame.Rect(200, 200, 200, 200))
+
+    # Обработка событий
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             exit = True
-        keys = pygame.key.get_pressed()
-        if keys[pygame.K_LEFT]:
-            batman.x = batman.x - 5
-        if keys[pygame.K_RIGHT]:
-            batman.x = batman.x + 5
-        if keys[pygame.K_UP]:
-            batman.y = batman.y - 5
-        if keys[pygame.K_DOWN]:
-            batman.y = batman.y + 5
-        if keys[pygame.K_SPACE] and on_ground == True:
-            jump_height_flag = True
-            jump_height = batman.y - 100
-            velocity = 5
-            a = 25
-            on_ground = False
 
-    if on_ground == False and jump_height_flag == True:
-        velocity = velocity + math.sqrt(a)
-        batman.y = batman.y - velocity
-        if batman.y <= jump_height:
-            velocity = 0
-            a = 0.6
-            jump_height_flag = False
+    # Управление Бэтменом
+    keys = pygame.key.get_pressed()
+    if keys[pygame.K_LEFT]:
+        batman.x -= 5
+        batman.state = 'running'
+    elif keys[pygame.K_RIGHT]:
+        batman.x += 5
+        batman.state = 'running'
+    else:
+        if batman.state == 'running':
+            batman.state = 'idle'
+    if keys[pygame.K_SPACE]:
+        batman.jump()
+    if keys[pygame.K_f]:
+        batman.attack()
 
-    elif on_ground == False:
-        batman.y = batman.y + velocity
-        velocity = velocity + a**2
-        if batman.y >= height-250:
-            on_ground = True
-    display.blit(batman.sprites[count],(batman.x,batman.y))
+    # Обновление персонажей
+    batman.update()
+    spider_man.update()
+
+    # Проверка столкновений
+    if batman.is_attacking and batman.attack_rect and batman.attack_rect.colliderect(spider_man.rect):
+        spider_man.headpoints -= batman.strength
+        print(f"{spider_man.name} получил удар! HP: {spider_man.headpoints}")
+
+    # Отрисовка с учетом направления
+    if batman.facing_right:
+        batman_image = batman.image
+    else:
+        batman_image = pygame.transform.flip(batman.image, True, False)
+    if spider_man.facing_right:
+        spiderman_image = spider_man.image
+    else:
+        spiderman_image = pygame.transform.flip(spider_man.image, True, False)
+
+    display.blit(batman_image, (batman.x, batman.y))
+    display.blit(spiderman_image, (spider_man.x, spider_man.y))
+
     pygame.display.update()
+
+pygame.quit()
