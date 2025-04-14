@@ -23,7 +23,7 @@ class Character:
         self.attack_rect = None  # Хитбокс атаки
         self.attack_duration = 0  # Длительность атаки (в кадрах)
 
-        # Переменные для прыжка
+        # Переменныеt для прыжка
         self.on_ground = True
         self.jump_height_flag = False
         self.velocity = 0
@@ -52,11 +52,12 @@ class Character:
             self.current_sprite = 0
             self.is_attacking = True
             self.attack_duration = 10  # Атака длится 10 кадров
-            if self.facing_right:
-                self.attack_rect = pygame.Rect(self.x + 50, self.y, 30, 50)  # Вправо
-            else:
-                self.attack_rect = pygame.Rect(self.x - 30, self.y, 30, 50)  # Влево
+            attack_range = 150  # расстояние удара по оси X
 
+            if self.facing_right:
+                self.attack_rect = pygame.Rect(self.x + attack_range, self.y, 50, 50)  # Вправо
+            else:
+                self.attack_rect = pygame.Rect(self.x - attack_range, self.y, 50, 50)
     def update(self):
         """Обновление состояния, анимации и позиции персонажа"""
         # Обновление направления
