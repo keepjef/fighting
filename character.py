@@ -3,8 +3,7 @@ import math
 
 
 class Character:
-    def __init__(self, name, headpoints, x, y, image, strength, sprites: list, attack_sprites: list,
-                 jump_sprites: list):
+    def __init__(self, name, headpoints, x, y, image, strength, sprites: list, attack_sprites: list, jump_sprites: list):
         self.name = name
         self.headpoints = headpoints
         self.x = x

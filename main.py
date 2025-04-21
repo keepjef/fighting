@@ -6,6 +6,7 @@ width = 1000
 height = 600
 display = pygame.display.set_mode((width, height))
 pygame.display.set_caption("Fight Club")
+background = pygame.image.load('assets/images/background.jpg')
 
 # Загрузка изображений
 image = pygame.image.load("assets/images/img.png")
@@ -34,20 +35,44 @@ jump_sprites = [
 batman = Character("Batman", 100, 20, 200, image, 10, run_sprites, attack_sprites, jump_sprites)
 spider_man = Character("Spider-Man", 100, 20, 200, image, 10, run_sprites, attack_sprites, jump_sprites)
 
+# Функция для отображения здоровья в углах
+def draw_health_bar_corner(character, surface, position):
+    bar_width = 200
+    bar_height = 20
+    if position == 'left':
+        bar_x = 20
+    else:
+        bar_x = width - bar_width - 20
+    bar_y = 20
+    hp_ratio = character.headpoints / 100
+
+    if hp_ratio > 0.6:
+        color = (0, 255, 0)
+    elif hp_ratio > 0.3:
+        color = (255, 255, 0)
+    else:
+        color = (255, 0, 0)
+
+    pygame.draw.rect(surface, (0, 0, 0), (bar_x - 2, bar_y - 2, bar_width + 4, bar_height + 4))
+    pygame.draw.rect(surface, (50, 50, 50), (bar_x, bar_y, bar_width, bar_height))
+    pygame.draw.rect(surface, color, (bar_x, bar_y, bar_width * hp_ratio, bar_height))
+
+    font = pygame.font.SysFont('Arial', 20)
+    name_surface = font.render(character.name, True, (255, 255, 255))
+    surface.blit(name_surface, (bar_x, bar_y + bar_height + 5))
+
 exit = False
 clock = pygame.time.Clock()
 
 while not exit:
     clock.tick(40)
-    display.fill('green')
-    pygame.draw.rect(display, (255, 255, 255), pygame.Rect(200, 200, 200, 200))
+    display.blit(background, (0, 0))
+    # pygame.draw.rect(display, (255, 255, 255), pygame.Rect(200, 200, 200, 200))
 
-    # Обработка событий
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             exit = True
 
-    # Управление Бэтменом
     keys = pygame.key.get_pressed()
     if keys[pygame.K_LEFT]:
         batman.x -= 5
@@ -77,11 +102,9 @@ while not exit:
     if keys[pygame.K_x]:
         spider_man.attack()
 
-    # Обновление персонажей
     batman.update()
     spider_man.update()
 
-    # Проверка столкновений
     if batman.is_attacking and batman.attack_rect and batman.attack_duration == 9:
         if batman.attack_rect.colliderect(spider_man.rect):
             spider_man.headpoints -= batman.strength
@@ -92,18 +115,14 @@ while not exit:
             batman.headpoints -= spider_man.strength
             print(f"{batman.name} получил удар от {spider_man.name}! HP: {batman.headpoints}")
 
-    # Отрисовка с учетом направления
-    if batman.facing_right:
-        batman_image = batman.image
-    else:
-        batman_image = pygame.transform.flip(batman.image, True, False)
-    if spider_man.facing_right:
-        spiderman_image = spider_man.image
-    else:
-        spiderman_image = pygame.transform.flip(spider_man.image, True, False)
+    batman_image = batman.image if batman.facing_right else pygame.transform.flip(batman.image, True, False)
+    spiderman_image = spider_man.image if spider_man.facing_right else pygame.transform.flip(spider_man.image, True, False)
 
     display.blit(batman_image, (batman.x, batman.y))
     display.blit(spiderman_image, (spider_man.x, spider_man.y))
+
+    draw_health_bar_corner(batman, display, 'left')
+    draw_health_bar_corner(spider_man, display, 'right')
 
     pygame.display.update()
 
